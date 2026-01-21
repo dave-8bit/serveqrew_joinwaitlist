@@ -53,9 +53,9 @@ export default function Leaderboard() {
   }, [fetchLeaderboard]);
 
   return (
-    <section id="leaderboard" className="relative z-10 max-w-4xl mx-auto px-4 py-20 scroll-mt-20">
+    <section id="leaderboard" className="relative z-10 max-w-4xl mx-auto px-4 py-12 sm:py-20 scroll-mt-20">
       {/* Header Section */}
-      <div className="text-center mb-12">
+      <div className="text-center mb-8 sm:mb-12">
         <h2 className="text-4xl sm:text-6xl font-black uppercase italic tracking-tighter text-white leading-none">
           Elite <span className="text-secondary-teal">Rankings</span>
         </h2>
@@ -73,8 +73,7 @@ export default function Leaderboard() {
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="bg-white/[0.03] backdrop-blur-3xl rounded-[40px] border border-white/10 overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.4)]">
+      <div className="bg-white/[0.03] backdrop-blur-3xl rounded-[30px] sm:rounded-[40px] border border-white/10 overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.4)]">
         {loading ? (
           <div className="h-[400px] flex flex-col items-center justify-center gap-4">
             <Loader2 className="w-12 h-12 text-secondary-teal animate-spin" />
@@ -88,7 +87,8 @@ export default function Leaderboard() {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* DESKTOP VIEW: Left exactly as you provided */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[600px]">
                 <thead>
                   <tr className="border-b border-white/5 bg-white/[0.02]">
@@ -99,7 +99,6 @@ export default function Leaderboard() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   <AnimatePresence>
-                    {/* LIMIT TO 10 ROWS HERE */}
                     {data.slice(0, 10).map((entry, i) => (
                       <motion.tr 
                         key={entry.referral_code}
@@ -116,36 +115,24 @@ export default function Leaderboard() {
                             {entry.rank <= 3 ? <Trophy className="w-5 h-5" /> : `#${entry.rank}`}
                           </div>
                         </td>
-
                         <td className="px-2 py-6">
                           <div className="flex flex-col">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="font-black uppercase italic text-white text-xl tracking-tighter">
-                                {entry.full_name}
-                              </span>
+                              <span className="font-black uppercase italic text-white text-xl tracking-tighter">{entry.full_name}</span>
                               {entry.rank <= 3 && (
-                                <span className="bg-yellow-400 text-slate-950 text-[8px] font-[1000] px-2 py-0.5 rounded-md uppercase italic">
-                                  Genesis
-                                </span>
+                                <span className="bg-yellow-400 text-slate-950 text-[8px] font-[1000] px-2 py-0.5 rounded-md uppercase italic">Genesis</span>
                               )}
                             </div>
-                            
                             <div className="flex items-center gap-2">
                                <span className="text-[10px] font-bold text-secondary-teal uppercase italic tracking-wider">
                                 {entry.rank <= 3 ? "👑 Tier 1 Access" : "⚡ Priority Member"}
                               </span>
                               {entry.brand_name && (
-                                <>
-                                  <span className="text-white/20 text-[10px]">•</span>
-                                  <span className="text-[10px] font-bold text-slate-500 uppercase italic tracking-widest">
-                                    {entry.brand_name}
-                                  </span>
-                                </>
+                                <><span className="text-white/20 text-[10px]">•</span><span className="text-[10px] font-bold text-slate-500 uppercase italic tracking-widest">{entry.brand_name}</span></>
                               )}
                             </div>
                           </div>
                         </td>
-
                         <td className="px-8 py-6 text-right">
                           <div className="flex items-center justify-end gap-3">
                             <div className="text-right">
@@ -162,17 +149,53 @@ export default function Leaderboard() {
               </table>
             </div>
 
-            {/* JOIN THE TOP 10 CALL TO ACTION */}
-            <div className="p-8 bg-white/[0.02] border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+            {/* MOBILE VIEW (320px Ready) */}
+            <div className="md:hidden flex flex-col divide-y divide-white/5">
+              <AnimatePresence>
+                {data.slice(0, 10).map((entry, i) => (
+                  <motion.div 
+                    key={entry.referral_code}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="p-4 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-9 h-9 shrink-0 rounded-xl flex items-center justify-center font-black italic text-xs
+                        ${entry.rank === 1 ? 'bg-yellow-400 text-slate-950' : 
+                          entry.rank === 2 ? 'bg-slate-300 text-slate-800' : 
+                          entry.rank === 3 ? 'bg-orange-400 text-slate-900' : 'bg-white/5 text-slate-500'}`}>
+                        {entry.rank <= 3 ? <Trophy className="w-4 h-4" /> : `#${entry.rank}`}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-black uppercase italic text-white text-sm tracking-tight truncate">
+                          {entry.full_name}
+                        </span>
+                        <span className="text-[8px] font-bold text-secondary-teal uppercase tracking-tighter truncate">
+                          {entry.brand_name || (entry.rank <= 3 ? "Genesis Tier" : "Priority Member")}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right ml-2 shrink-0">
+                      <div className="text-xl font-black italic text-white leading-none tracking-tighter">{entry.referral_count}</div>
+                      <div className="text-[7px] font-black text-slate-500 uppercase">Referrals</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* CTA Section */}
+            <div className="p-6 sm:p-8 bg-white/[0.02] border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="text-center sm:text-left">
-                <p className="text-white font-black uppercase italic text-lg tracking-tight">Not on the list yet?</p>
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Join the network to secure your Genesis rank.</p>
+                <p className="text-white font-black uppercase italic text-base sm:text-lg tracking-tight">Not on the list yet?</p>
+                <p className="text-slate-500 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest mt-1">Join the network to secure your Genesis rank.</p>
               </div>
               <button 
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="group flex items-center gap-2 bg-secondary-teal text-slate-950 px-6 py-3 rounded-2xl font-black uppercase italic text-sm hover:scale-105 active:scale-95 transition-all shadow-xl shadow-secondary-teal/20"
+                className="w-full sm:w-auto group flex items-center justify-center gap-2 bg-secondary-teal text-slate-950 px-6 py-3 rounded-xl sm:rounded-2xl font-black uppercase italic text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all shadow-xl shadow-secondary-teal/20"
               >
-                Join The Top 10 <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                Join Now <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
             </div>
           </>
