@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Loader2, AlertCircle, Mail } from 'lucide-react';
-import { supabase } from '../lib/supabase'; // IMPORT your supabase client
+// FIX: Added supabaseUrl and supabaseAnonKey to the import list
+import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
 
 type FormStatus =
   | { type: 'success'; message: string }
@@ -13,8 +14,6 @@ export default function WaitlistForm() {
   const [isJoining, setIsJoining] = useState(false);
   const [status, setStatus] = useState<FormStatus | null>(null);
   const [refCode, setRefCode] = useState<string | null>(null);
-
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // Keep your key
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -38,13 +37,13 @@ export default function WaitlistForm() {
 
     try {
       const response = await fetch(
-        'https://mnqypkgrbqhkzwptmaug.supabase.co/functions/v1/smooth-worker',
+        `${supabaseUrl}/functions/v1/smooth-worker`,
         {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey.trim()}`
           },
           body: JSON.stringify(payload),
         }
@@ -55,40 +54,34 @@ export default function WaitlistForm() {
       if (response.status === 201 || response.ok) {
         setStatus({ type: 'success', message: data.message || "Welcome to the Qrew!" });
       } 
-      // CHECK IF USER ALREADY EXISTS
       else if (response.status === 409 || data.message?.toLowerCase().includes('already')) {
         setStatus({ type: 'info', message: "Account found. Sending access link..." });
         
-        // TRIGGER MAGIC LINK FOR RETURNING USER
         const { error: authError } = await supabase.auth.signInWithOtp({
           email: email,
           options: {
-            emailRedirectTo: window.location.origin + '/dashboard',
+            emailRedirectTo: `${window.location.origin}/dashboard`,
           },
         });
 
         if (authError) throw authError;
-
         setStatus({ type: 'success', message: "Access link sent! Check your inbox." });
       } else {
-        const statusType: 'warning' | 'error' = response.status === 429 ? 'warning' : 'error';
         setStatus({
-          type: statusType,
+          type: response.status === 429 ? 'warning' : 'error',
           message: data.message || 'Request failed.',
         });
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Submission Error:", err); 
-      setStatus({
-        type: 'error',
-        message: 'Auth error or connection issue.',
-      });
+      const errorMessage = err instanceof Error ? err.message : 'Authentication error.';
+      setStatus({ type: 'error', message: errorMessage });
     } finally {
       setIsJoining(false);
     }
   };
 
-  // SUCCESS STATE
+  // ... rest of your component (the JSX return) stays exactly the same as before
   if (status?.type === 'success') {
     return (
       <section className="relative z-10 py-16 sm:py-32 px-4 text-center">
@@ -103,9 +96,7 @@ export default function WaitlistForm() {
           <h3 className="text-2xl md:text-3xl font-black uppercase italic text-white mb-6">
             Check Your <span className="text-secondary-teal">Email</span>
           </h3>
-          <p className="text-sm font-bold italic text-slate-400 mb-8">
-            {status.message}
-          </p>
+          <p className="text-sm font-bold italic text-slate-400 mb-8">{status.message}</p>
           <button onClick={() => setStatus(null)} className="text-xs font-black uppercase italic text-secondary-teal hover:underline">
             Go back
           </button>
@@ -116,11 +107,9 @@ export default function WaitlistForm() {
 
   return (
     <section id="waitlist" className="relative z-10 py-16 sm:py-32 px-4 scroll-mt-24">
-      {/* ... keep your existing form JSX ... */}
       <div className="w-full max-w-md md:max-w-2xl mx-auto">
         <motion.div className="relative p-4 md:p-8 border rounded-[40px] bg-white/[0.03] backdrop-blur-3xl border-white/10 shadow-2xl">
           <form className="flex flex-col gap-4" onSubmit={joinWaitlist}>
-            {/* Input fields stay the same */}
             <input name="full_name" required placeholder="Full Name" className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50" />
             <input name="email" type="email" required placeholder="Email Address" className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50" />
             <input name="brand_name" placeholder="Brand Name (Optional)" className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50" />
