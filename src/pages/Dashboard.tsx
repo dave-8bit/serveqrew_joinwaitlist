@@ -183,7 +183,7 @@ export default function Dashboard({ session }: { session: SupabaseSession }) {
                 ) : (
                   <tr>
                     <td colSpan={3} className="px-8 py-12 text-center text-slate-600 italic text-xs sm:text-base">
-                      No referrals yet. Share your link to start growing!
+                      No referrals yet. Share your link to start growing! You don't want to miss out on rewards.
                     </td>
                   </tr>
                 )}
