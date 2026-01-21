@@ -23,7 +23,6 @@ function App() {
       setLoading(false);
       
       if (_event === 'SIGNED_IN') {
-        // Keeps the URL clean after login redirect
         window.history.replaceState({}, '', window.location.pathname);
       }
     });
@@ -33,35 +32,33 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-secondary-teal border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-2 border-secondary-teal border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-[10px] font-black uppercase italic tracking-[0.3em] text-secondary-teal animate-pulse">
+          Securing Connection...
+        </p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen font-sans antialiased bg-slate-950 text-white selection:bg-teal-500/30">
-      {/* Navigation shows only if there is no session. 
-         Note: Our updated Navigation handles 320px responsiveness.
-      */}
-      {!session && <Navigation />}
+      {/* UPDATE: Pass the session here so Navigation knows who is logged in */}
+      <Navigation session={session} />
 
       <main className="relative">
         <Routes>
-          {/* Public Route */}
           <Route 
             path="/" 
-            element={session ? <Navigate to="/dashboard" /> : <LandingPage />} 
+            element={session ? <Navigate to="/dashboard" replace /> : <LandingPage />} 
           />
 
-          {/* Private Route */}
           <Route 
             path="/dashboard" 
-            element={session ? <Dashboard session={session} /> : <Navigate to="/" />} 
+            element={session ? <Dashboard session={session} /> : <Navigate to="/" replace />} 
           />
 
-          {/* Fallback: Redirect any unknown path to home */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>
