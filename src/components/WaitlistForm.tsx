@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { motion, } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Sparkles, Loader2, AlertCircle, Mail } from 'lucide-react';
+import { supabase } from '../lib/supabase'; // IMPORT your supabase client
 
 type FormStatus =
   | { type: 'success'; message: string }
@@ -13,8 +14,7 @@ export default function WaitlistForm() {
   const [status, setStatus] = useState<FormStatus | null>(null);
   const [refCode, setRefCode] = useState<string | null>(null);
 
-  // YOUR SUPABASE ANON KEY
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ucXlwa2dyYnFoa3p3cHRtYXVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMzg0MzIsImV4cCI6MjA4MTcxNDQzMn0.F4ddMOGvsUHoh935pmgacBDhl2Z-I4qBRQLhxSLZCNA";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // Keep your key
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -28,9 +28,10 @@ export default function WaitlistForm() {
     setStatus(null);
 
     const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
     const payload = {
       full_name: formData.get('full_name'),
-      email: formData.get('email'),
+      email: email,
       brand_name: formData.get('brand_name') || undefined,
       ref: refCode || undefined,
     };
@@ -53,6 +54,22 @@ export default function WaitlistForm() {
 
       if (response.status === 201 || response.ok) {
         setStatus({ type: 'success', message: data.message || "Welcome to the Qrew!" });
+      } 
+      // CHECK IF USER ALREADY EXISTS
+      else if (response.status === 409 || data.message?.toLowerCase().includes('already')) {
+        setStatus({ type: 'info', message: "Account found. Sending access link..." });
+        
+        // TRIGGER MAGIC LINK FOR RETURNING USER
+        const { error: authError } = await supabase.auth.signInWithOtp({
+          email: email,
+          options: {
+            emailRedirectTo: window.location.origin + '/dashboard',
+          },
+        });
+
+        if (authError) throw authError;
+
+        setStatus({ type: 'success', message: "Access link sent! Check your inbox." });
       } else {
         const statusType: 'warning' | 'error' = response.status === 429 ? 'warning' : 'error';
         setStatus({
@@ -61,20 +78,17 @@ export default function WaitlistForm() {
         });
       }
     } catch (err) {
-  // Use the variable here
-  console.error("Submission Error:", err); 
-  
-  setStatus({
-    type: 'error',
-    message: 'Network error. Please check connection.',
-  });
-
+      console.error("Submission Error:", err); 
+      setStatus({
+        type: 'error',
+        message: 'Auth error or connection issue.',
+      });
     } finally {
       setIsJoining(false);
     }
   };
 
-  // SUCCESS STATE (DARK MODE GLASS)
+  // SUCCESS STATE
   if (status?.type === 'success') {
     return (
       <section className="relative z-10 py-16 sm:py-32 px-4 text-center">
@@ -90,10 +104,10 @@ export default function WaitlistForm() {
             Check Your <span className="text-secondary-teal">Email</span>
           </h3>
           <p className="text-sm font-bold italic text-slate-400 mb-8">
-            Your referral and magic link have been sent.
+            {status.message}
           </p>
           <button onClick={() => setStatus(null)} className="text-xs font-black uppercase italic text-secondary-teal hover:underline">
-            Try again
+            Go back
           </button>
         </motion.div>
       </section>
@@ -102,30 +116,21 @@ export default function WaitlistForm() {
 
   return (
     <section id="waitlist" className="relative z-10 py-16 sm:py-32 px-4 scroll-mt-24">
+      {/* ... keep your existing form JSX ... */}
       <div className="w-full max-w-md md:max-w-2xl mx-auto">
         <motion.div className="relative p-4 md:p-8 border rounded-[40px] bg-white/[0.03] backdrop-blur-3xl border-white/10 shadow-2xl">
           <form className="flex flex-col gap-4" onSubmit={joinWaitlist}>
-            <input
-              name="full_name"
-              required
-              placeholder="Full Name"
-              className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50"
-            />
-            <input
-              name="email"
-              type="email"
-              required
-              placeholder="Email Address"
-              className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50"
-            />
-            <input
-              name="brand_name"
-              placeholder="Brand Name (Optional)"
-              className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50"
-            />
+            {/* Input fields stay the same */}
+            <input name="full_name" required placeholder="Full Name" className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50" />
+            <input name="email" type="email" required placeholder="Email Address" className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50" />
+            <input name="brand_name" placeholder="Brand Name (Optional)" className="px-6 py-4 rounded-2xl font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-secondary-teal/50" />
 
             {status && (
-              <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-[10px] font-black uppercase italic ${status.type === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-secondary-teal/10 text-secondary-teal'}`}>
+              <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-[10px] font-black uppercase italic ${
+                status.type === 'error' ? 'bg-red-500/10 text-red-500' : 
+                status.type === 'info' ? 'bg-blue-500/10 text-blue-400' :
+                'bg-secondary-teal/10 text-secondary-teal'
+              }`}>
                 <AlertCircle className="w-4 h-4" />
                 {status.message}
               </div>
@@ -136,7 +141,7 @@ export default function WaitlistForm() {
               disabled={isJoining}
               className="py-5 rounded-2xl font-black uppercase italic flex items-center justify-center gap-2 bg-secondary-teal text-white hover:opacity-90 transition-opacity disabled:opacity-50"
             >
-              {isJoining ? <Loader2 className="animate-spin" /> : <><Sparkles /> Join Waitlist</>}
+              {isJoining ? <Loader2 className="animate-spin" /> : <><Sparkles /> Join or Log In</>}
             </button>
           </form>
         </motion.div>
