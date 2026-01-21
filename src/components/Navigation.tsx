@@ -25,10 +25,8 @@ export default function Navigation({ session }: NavigationProps) {
 
   const handleStatsClick = () => {
     if (session) {
-      // User is logged in, send to dashboard
       navigate('/dashboard');
     } else {
-      // User is logged out, scroll to form and show the "Login via form" instruction
       document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
       setShowLoginPrompt(true);
       setTimeout(() => setShowLoginPrompt(false), 6000);
@@ -52,11 +50,11 @@ export default function Navigation({ session }: NavigationProps) {
             <div className="bg-secondary-teal rounded-full p-2 shrink-0">
               <ShieldCheck className="w-4 h-4 text-white" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-white font-black italic uppercase text-[10px] leading-tight tracking-wider">Returning operative?</p>
-              <p className="text-secondary-teal/80 text-[9px] font-bold uppercase tracking-wider mt-0.5">Enter your email in the form below to receive your secure access link.</p>
+              <p className="text-secondary-teal/80 text-[9px] font-bold uppercase tracking-wider mt-0.5">Enter your email below to receive your secure access link.</p>
             </div>
-            <button onClick={() => setShowLoginPrompt(false)} className="text-white/40 hover:text-white transition-colors">
+            <button onClick={() => setShowLoginPrompt(false)} className="text-white/40 hover:text-white">
                <X className="w-4 h-4" />
             </button>
           </motion.div>
@@ -65,7 +63,6 @@ export default function Navigation({ session }: NavigationProps) {
 
       <nav className="fixed top-0 w-full z-50 px-2 sm:px-8 py-2.5 sm:py-5 backdrop-blur-2xl border-b border-white/5 flex justify-between items-center bg-slate-950/50">
         <div className="flex items-center gap-2 sm:gap-5">
-          {/* Logo Section */}
           <div className="relative w-9 h-9 sm:w-16 sm:h-16 p-[1px] rounded-lg sm:rounded-2xl bg-white/10 overflow-hidden shrink-0">
             <motion.div 
               animate={{ rotate: 360 }} 
@@ -77,7 +74,6 @@ export default function Navigation({ session }: NavigationProps) {
             </div>
           </div>
 
-          {/* Branding */}
           <div className="hidden md:flex flex-col border-l border-white/10 pl-5">
             <h1 className="text-2xl font-black uppercase italic leading-none tracking-tighter text-white">
               SERVE<span className="text-secondary-teal">QREW</span>
@@ -89,23 +85,14 @@ export default function Navigation({ session }: NavigationProps) {
               </span>
             </div>
           </div>
-
-          <div className="flex sm:hidden flex-col">
-             <span className="text-[10px] font-black uppercase italic text-white tracking-tighter leading-none">
-               SERVE<span className="text-secondary-teal">QREW</span>
-             </span>
-             <span className="text-[6px] font-bold uppercase tracking-[0.1em] text-secondary-teal/80 italic mt-0.5">
-               Access Intel
-             </span>
-          </div>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-4">
           <button 
             onClick={handleStatsClick}
-            className="flex items-center gap-1.5 px-2 sm:px-4 py-1.5 sm:py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:text-secondary-teal hover:border-secondary-teal/50 transition-all group shrink-0"
+            className="flex items-center gap-1.5 px-2 sm:px-4 py-1.5 sm:py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:text-secondary-teal hover:border-secondary-teal/50 transition-all group"
           >
-            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 text-secondary-teal group-hover:scale-110 transition-transform" />
+            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 text-secondary-teal group-hover:scale-110" />
             <span className="text-[8px] sm:text-xs font-black uppercase italic tracking-widest">Stats</span>
           </button>
 
@@ -115,12 +102,12 @@ export default function Navigation({ session }: NavigationProps) {
               className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-white/40 hover:text-red-400 transition-colors flex items-center gap-1 sm:gap-2 border border-transparent hover:border-red-400/20"
             >
               <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="text-[8px] sm:text-xs font-black uppercase italic">Exit</span>
+              <span className="text-[8px] sm:text-xs font-black uppercase italic text-nowrap">Exit</span>
             </button>
           ) : (
             <button 
               onClick={scrollToWaitlist}
-              className="px-2.5 sm:px-6 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[8px] sm:text-xs font-black uppercase italic tracking-wider border border-white/10 hover:border-accent-yellow bg-white/5 hover:bg-accent-yellow/10 transition-all text-white hover:text-accent-yellow shadow-lg whitespace-nowrap"
+              className="px-2.5 sm:px-6 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[8px] sm:text-xs font-black uppercase italic tracking-wider border border-white/10 hover:border-accent-yellow bg-white/5 hover:bg-accent-yellow/10 transition-all text-white hover:text-accent-yellow shadow-lg"
             >
               Join
             </button>
