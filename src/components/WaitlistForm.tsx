@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Loader2, AlertCircle, Mail } from 'lucide-react';
-// FIX: Added supabaseUrl and supabaseAnonKey to the import list
 import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
 
 type FormStatus =
@@ -56,32 +55,30 @@ export default function WaitlistForm() {
       } 
       else if (response.status === 409 || data.message?.toLowerCase().includes('already')) {
         setStatus({ type: 'info', message: "Account found. Sending access link..." });
-        
         const { error: authError } = await supabase.auth.signInWithOtp({
           email: email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-          },
+          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
         });
-
         if (authError) throw authError;
         setStatus({ type: 'success', message: "Access link sent! Check your inbox." });
       } else {
         setStatus({
           type: response.status === 429 ? 'warning' : 'error',
-          message: data.message || 'Request failed.',
+          message: data.message || 'Request failed. Please try again.',
         });
       }
     } catch (err: unknown) {
-      console.error("Submission Error:", err); 
-      const errorMessage = err instanceof Error ? err.message : 'Authentication error.';
+      console.error("Submission Error:", err); // <-- dev-friendly logging
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'We encountered an error. Please try again later.'; // <-- user-friendly message
       setStatus({ type: 'error', message: errorMessage });
     } finally {
       setIsJoining(false);
     }
   };
 
-  // ... rest of your component (the JSX return) stays exactly the same as before
   if (status?.type === 'success') {
     return (
       <section className="relative z-10 py-16 sm:py-32 px-4 text-center">

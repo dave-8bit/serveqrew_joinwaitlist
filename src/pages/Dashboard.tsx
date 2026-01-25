@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Share2,
-  Trophy,
-  Users,
-  CheckCircle,
-  Loader2,
-  Zap,
-} from 'lucide-react';
+import { Share2, Trophy, Users, CheckCircle, Loader2, Zap } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 
 interface Referral {
@@ -42,13 +35,12 @@ export default function Dashboard({ session }: { session: Session }) {
           {
             method: 'GET',
             headers: {
-              Authorization: `Bearer ${session.access_token}`,
+              'Authorization': `Bearer ${session.access_token}`,
               'Content-Type': 'application/json',
             },
           }
         );
 
-        if (response.status === 401) return;
         if (!response.ok) throw new Error('Failed to fetch stats');
 
         const result = await response.json();
@@ -64,23 +56,23 @@ export default function Dashboard({ session }: { session: Session }) {
   }, [session.access_token]);
 
   const copyToClipboard = () => {
-    if (!data?.profile.shareLink) return;
-    navigator.clipboard.writeText(data.profile.shareLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (data?.profile.shareLink) {
+      navigator.clipboard.writeText(data.profile.shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white">
         <Loader2 className="w-10 h-10 animate-spin text-secondary-teal mb-4" />
-        <p className="font-black uppercase italic tracking-widest text-[10px] animate-pulse">
+        <p className="font-black uppercase italic tracking-widest text-[10px] text-center px-4 animate-pulse">
           Decrypting Intel...
         </p>
       </div>
     );
   }
-
   if (!data) return null;
 
   return (
