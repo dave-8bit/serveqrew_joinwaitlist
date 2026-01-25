@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus, Shield, GraduationCap } from 'lucide-react';
 
 const faqs = [
-  { q: "What exactly is ServeQrew?", a: "Think of it as a digital market. It's where people find, buy and offer goods and services. You're not just borrowing to purchase, you can also list the products you sell or services you offer, chat directly with customers and grow your hustle." },
+  { q: "What exactly is ServeQrew?", a: "Think of it as a digital market. It's where people find, buy and offer goods and services. You're not just browsing to purchase, you can also list the products you sell or services you offer, chat directly with customers and grow your hustle." },
   { q: "Do I have to be a student to use it?", a: "Our heart is in UNN for now as we have to start somewhere so students are our priority. However, anyone in Nigeria (lecturers, business owners, etc.) can buy or sell services! UNN is the starting point!" },
   { q: "How do I get paid for my services?", a: "You search for a provider, chat with them directly on the app, and agree on terms. We are building secure ways to ensure everyone gets what they paid for and also maximum security of vital information." },
   { q: "Is my data safe?", a: "100%. We use modern security to keep your chats private. Plus, we verify users to keep the scammers out." },
