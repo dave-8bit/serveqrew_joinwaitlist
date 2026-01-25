@@ -11,25 +11,27 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // 1️⃣ Get initial session (runs once on app load)
+    const initSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
       setLoading(false);
-    });
+    };
 
-    // 2. Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    initSession();
+
+    // 2️⃣ Listen for auth state changes (sign in / sign out / refresh)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
-      
-      if (_event === 'SIGNED_IN') {
-        window.history.replaceState({}, '', window.location.pathname);
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  // ⏳ Global loading screen (prevents route flicker)
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
@@ -43,21 +45,24 @@ function App() {
 
   return (
     <div className="min-h-screen font-sans antialiased bg-slate-950 text-white selection:bg-teal-500/30">
-      {/* UPDATE: Pass the session here so Navigation knows who is logged in */}
+      {/* Navigation already handles UI logic based on session */}
       <Navigation session={session} />
 
-      <main className="relative">
+      <main className="relative pt-20">
         <Routes>
-          <Route 
-            path="/" 
-            element={session ? <Navigate to="/dashboard" replace /> : <LandingPage />} 
+          {/* Public route */}
+          <Route
+            path="/"
+            element={session ? <Navigate to="/dashboard" replace /> : <LandingPage />}
           />
 
-          <Route 
-            path="/dashboard" 
-            element={session ? <Dashboard session={session} /> : <Navigate to="/" replace />} 
+          {/* Protected route */}
+          <Route
+            path="/dashboard"
+            element={session ? <Dashboard session={session} /> : <Navigate to="/" replace />}
           />
 
+          {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
