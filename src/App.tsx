@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
-import WaitlistForm from './components/WaitlistForm';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
@@ -54,10 +53,7 @@ function App() {
               session ? (
                 <Navigate to="/dashboard" replace />
               ) : (
-                <>
-                  <LandingPage />
-                  <WaitlistForm />
-                </>
+                <LandingPage /> // ✅ Only one form now, inside LandingPage
               )
             } 
           />
