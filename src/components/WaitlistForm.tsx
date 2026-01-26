@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Loader2, AlertCircle, Mail } from 'lucide-react';
-import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 type FormStatus =
   | { type: 'success'; message: string }
@@ -36,13 +36,13 @@ export default function WaitlistForm() {
 
     try {
       const response = await fetch(
-        `${supabaseUrl}/functions/v1/smooth-worker`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/smooth-worker`,
         {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'apikey': supabaseAnonKey,
-            'Authorization': `Bearer ${supabaseAnonKey.trim()}`
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY.trim()}`
           },
           body: JSON.stringify(payload),
         }
@@ -57,7 +57,7 @@ export default function WaitlistForm() {
         setStatus({ type: 'info', message: "Account found. Sending access link..." });
         const { error: authError } = await supabase.auth.signInWithOtp({
           email: email,
-          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+          options: { emailRedirectTo: 'https://serveqrew.org/dashboard' },
         });
         if (authError) throw authError;
         setStatus({ type: 'success', message: "Access link sent! Check your inbox." });
@@ -68,11 +68,11 @@ export default function WaitlistForm() {
         });
       }
     } catch (err: unknown) {
-      console.error("Submission Error:", err); // <-- dev-friendly logging
+      console.error("Submission Error:", err);
       const errorMessage =
         err instanceof Error
           ? err.message
-          : 'We encountered an error. Please try again later.'; // <-- user-friendly message
+          : 'We encountered an error. Please try again later.';
       setStatus({ type: 'error', message: errorMessage });
     } finally {
       setIsJoining(false);
